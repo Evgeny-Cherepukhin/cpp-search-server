@@ -1,4 +1,4 @@
-/ #include <algorithm>
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -80,8 +80,8 @@ public:
     }
     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus status) const {
         return FindTopDocuments(raw_query, [status](int document_id, DocumentStatus document_status, int rating) {
-            return document_status == status;
-            });
+            return document_status == status; 
+            });        
     }
     vector<Document> FindTopDocuments(const string& raw_query) const {
         return  FindTopDocuments(raw_query, [](int document_id, DocumentStatus status, int rating) {
