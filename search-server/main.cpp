@@ -1,6 +1,6 @@
-/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-2*/
+/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-2  with correction*/
 #include <cassert>
-#include<iostream>
+#include <iostream>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -8,12 +8,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 using namespace std;
 
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
-
+const double COMPARE_DOUBLE = 1e-6;
 string ReadLine() {
     string s;
     getline(cin, s);
@@ -100,7 +101,7 @@ public:
 
         sort(matched_documents.begin(), matched_documents.end(),
             [](const Document& lhs, const Document& rhs) {
-                if (abs(lhs.relevance - rhs.relevance) < 1e-6) {
+                if (abs(lhs.relevance - rhs.relevance) < COMPARE_DOUBLE) {
                     return lhs.rating > rhs.rating;
                 }
                 else {
@@ -168,11 +169,8 @@ private:
         if (ratings.empty()) {
             return 0;
         }
-        int rating_sum = 0;
-        for (const int rating : ratings) {
-            rating_sum += rating;
-        }
-        return rating_sum / static_cast<int>(ratings.size());
+
+        return accumulate(ratings.begin(), ratings.end(), 0) / static_cast<int>(ratings.size());
     }
 
     struct QueryWord {
@@ -348,8 +346,8 @@ void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& 
 
 template <class TestFunc>
 void RunTestImpl(TestFunc func_test, const string& func) {
-    cerr << func << " OK"s << endl;
     func_test();
+    cerr << func << " OK"s << endl;
 
 }
 
@@ -383,20 +381,20 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
 */
 /*Проверяем добавление документов*/
 void TestAddDocumentContent() {
-    const int doc_id = 42;
-    const string content = "cat in the city"s;
-    const vector<int> ratings = { 1, 2, 3 };
-    {
-        /*проверяем, что класс server не содержит документов*/
-        SearchServer server;
-        ASSERT(server.GetDocumentCount() == 0);
-        /*теперь добавляем документ и проверяем, что он таки добавился*/
-        server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-        ASSERT(server.GetDocumentCount() == 1);
-        /*убеждаемся, что добавлен именно этот документ*/
-        const auto found_docs = server.FindTopDocuments("сат city"s);
-        const Document& doc0 = found_docs[0];
-        ASSERT_EQUAL(doc0.id, doc_id);
+
+    /*проверяем, что класс server не содержит документов*/
+    SearchServer server;
+    ASSERT(server.GetDocumentCount() == 0);
+    /*теперь добавляем  несколько документов и проверяем, что они-таки добавился*/
+    server.AddDocument(0, "cat in the car"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
+    server.AddDocument(1, "dog in the car"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
+    server.AddDocument(2, "bat in the car"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
+
+    ASSERT(server.GetDocumentCount() == 3);
+    /*убеждаемся, что добавленs именно эти документы*/
+    const auto found_docs = server.FindTopDocuments("car"s);
+    for (int i = 0; i < found_docs.size(); ++i) {
+        ASSERT_EQUAL(found_docs[i].id, i);
     }
 }
 // Проверяемподдержку минус-слов. Убеждаемся, что документы, содержащие минус слова поискового запроса, не вкючаются в результаты поиска.
@@ -453,12 +451,31 @@ void  TestRelevanceSortContent() {
 /*Проверяем праильность вычисление среднего рейтинга*/
 void TestRatingCount() {
     SearchServer server;
-    server.AddDocument(1, "cat in the car"s, DocumentStatus::ACTUAL, { 1,2,3,4,5 });
-    vector<Document> test_find = server.FindTopDocuments("cat"s);
-    auto [id, relevance, rating] = test_find[0];
-    ASSERT_HINT(rating == 3, "The average rating was calculated incorrectly."s);
+    server.AddDocument(0, "cat in the car"s, DocumentStatus::ACTUAL, { 1,2,3,4,5 });
+    server.AddDocument(1, "dog in the car"s, DocumentStatus::ACTUAL, { -1,-2,-3,-4,-5 });
+    server.AddDocument(2, "bat in the car"s, DocumentStatus::ACTUAL, { 1,2,-3,-4,5 });
+    vector<int> test_av_ratings;
+    test_av_ratings.push_back((1 + 2 + 3 + 4 + 5) / 5);
+    test_av_ratings.push_back((-1 - 2 - 3 - 4 - 5) / 5);
+    test_av_ratings.push_back((1 + 2 - 3 - 4 + 5) / 5);
+    {
+        vector<Document> test_find = server.FindTopDocuments("cat"s);
+        ASSERT_HINT(test_av_ratings[0] == test_find[0].rating, "The average rating was calculated incorrectly."s);
+    }
+    {
+        vector<Document> test_find = server.FindTopDocuments("dog"s);
+        ASSERT_HINT(test_av_ratings[1] == test_find[0].rating, "The average rating was calculated incorrectly."s);
+    }
+    {
+        vector<Document> test_find = server.FindTopDocuments("bat"s);
+        ASSERT_HINT(test_av_ratings[2] == test_find[0].rating, "The average rating was calculated incorrectly."s);
+    }
+
 
 }
+
+
+
 
 /*Проверяем фильтрацию результатов поиска с использованием предиката*/
 void TestPredicateFindContent() {
@@ -496,13 +513,30 @@ void TestFindStatusContent() {
 void TestRelevanceCount() {
     SearchServer server;
     server.AddDocument(0, "cat in the car"s, DocumentStatus::ACTUAL, { 1,2,3,4,5 });
-    server.AddDocument(1, "cat on the boat"s, DocumentStatus::ACTUAL, { 6,7,8 });
+    server.AddDocument(1, "cat on the big green boat"s, DocumentStatus::ACTUAL, { 6,7,8 });
+    server.AddDocument(2, "little cat on the big green tree"s, DocumentStatus::ACTUAL, { 6,7,8 });
     double test_rel = 0.0;
-    double x = 4.0;
-    double y = 1.0;
-    test_rel = log(2) * (y / x);
-    auto [id, relevance, rating] = server.FindTopDocuments("car"s)[0];
-    ASSERT_EQUAL_HINT(relevance, test_rel, "Relevance is calculated incorrectly."s);
+    {
+        double x = 4.0;
+        double y = 1.0;
+        test_rel = log(3.0) * (y / x);
+        auto [id, relevance, rating] = server.FindTopDocuments("car"s)[0];
+        ASSERT_HINT((abs(relevance - test_rel) < COMPARE_DOUBLE), "Relevance is calculated incorrectly."s);
+    }
+    {
+        double x = 6.0;
+        double y = 1.0;
+        test_rel = log(3.0) * (y / x);
+        auto [id, relevance, rating] = server.FindTopDocuments("boat"s)[0];
+        ASSERT_HINT((abs(relevance - test_rel) < COMPARE_DOUBLE), "Relevance is calculated incorrectly."s);
+    }
+    {
+        double x = 7.0;
+        double y = 1.0;
+        test_rel = (log(3.0 / 2) * (y / x)) + (log(3.0 / 1) * (y / x));
+        auto [id, relevance, rating] = server.FindTopDocuments("big tree"s)[0];
+        ASSERT_HINT((abs(relevance - test_rel) < COMPARE_DOUBLE), "Relevance is calculated incorrectly."s);
+    }
 
 }
 // Функция TestSearchServer является точкой входа для запуска тестов
