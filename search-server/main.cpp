@@ -1,4 +1,4 @@
-/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-3 с устраненными замечаниями. Sprint-3 with correction*/
+/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-3 с устраненными замечаниями-2. Sprint-3 with correction-2*/
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -68,7 +68,7 @@ set<string> MakeUniqueNonEmptyStrings(const StringContainer& strings) {
     }
     return non_empty_strings;
 }
-const double COMPARE_DOUBLE = 1e-6;
+const double PRECISION = 1e-6;
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 enum class DocumentStatus {
     ACTUAL,
@@ -123,7 +123,7 @@ public:
         auto matched_documents = FindAllDocuments(query, document_predicate);
 
         sort(matched_documents.begin(), matched_documents.end(), [](const Document& lhs, const Document& rhs) {
-            if (abs(lhs.relevance - rhs.relevance) < COMPARE_DOUBLE) {
+            if (abs(lhs.relevance - rhs.relevance) < PRECISION) {
                 return lhs.rating > rhs.rating;
             }
             else {
