@@ -1,4 +1,4 @@
-/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-3 Sprint-3 Final*/
+/*Черепухин Евгений Сергеевич. Итоговый пропект спринт-3 с устраненными замечаниями. Sprint-3 with correction*/
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 using namespace std;
 string ReadLine() {
@@ -67,7 +68,7 @@ set<string> MakeUniqueNonEmptyStrings(const StringContainer& strings) {
     }
     return non_empty_strings;
 }
-
+const double COMPARE_DOUBLE = 1e-6;
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 enum class DocumentStatus {
     ACTUAL,
@@ -99,8 +100,11 @@ public:
     }
 
     void AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& ratings) {
-        if (document_id < 0 || (documents_.count(document_id) > 0)) {
-            throw invalid_argument("id существует или id отрицательный");
+        if (document_id < 0) {
+            throw invalid_argument("id не может быть отрицательным");
+        }
+        if (documents_.count(document_id) > 0) {
+            throw invalid_argument("попытка добавления документа с существующим  id");
         }
         const vector<string> words = SplitIntoWordsNoStop(document);
         const double inv_word_count = 1.0 / words.size();
@@ -115,14 +119,11 @@ public:
     vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const {
         vector<Document> result;
         result.clear();
-        Query query;
-        if (!ParseQuery(raw_query, query)) {
-            throw invalid_argument("неправильно оформлен поисковый запрос");
-        }
+        Query query = ParseQuery(raw_query);
         auto matched_documents = FindAllDocuments(query, document_predicate);
 
         sort(matched_documents.begin(), matched_documents.end(), [](const Document& lhs, const Document& rhs) {
-            if (abs(lhs.relevance - rhs.relevance) < 1e-6) {
+            if (abs(lhs.relevance - rhs.relevance) < COMPARE_DOUBLE) {
                 return lhs.rating > rhs.rating;
             }
             else {
@@ -165,10 +166,7 @@ public:
 
     tuple<vector<string>, DocumentStatus> MatchDocument(const string& raw_query, int document_id) const {
         tuple<vector<string>, DocumentStatus> result = {};
-        Query query;
-        if (!ParseQuery(raw_query, query)) {
-            throw invalid_argument("в поисковом запросе имеются спецсимволы, или неправильно оформлены минус-слова");
-        }
+        Query query = ParseQuery(raw_query);
         vector<string> matched_words;
         for (const string& word : query.plus_words) {
             if (word_to_document_freqs_.count(word) == 0) {
@@ -228,11 +226,7 @@ private:
         if (ratings.empty()) {
             return 0;
         }
-        int rating_sum = 0;
-        for (const int rating : ratings) {
-            rating_sum += rating;
-        }
-        return rating_sum / static_cast<int>(ratings.size());
+        return std::accumulate(ratings.begin(), ratings.end(), 0) / static_cast<int>(ratings.size());
     }
     struct QueryWord {
         string data;
@@ -240,11 +234,9 @@ private:
         bool is_stop;
     };
 
-    [[nodiscard]] bool ParseQueryWord(string text, QueryWord& result) const {
-        result = {};
-
+    QueryWord ParseQueryWord(string text) const {
         if (text.empty()) {
-            return false;
+            throw invalid_argument("пустой запрос");
         }
         bool is_minus = false;
         if (text[0] == '-') {
@@ -252,11 +244,10 @@ private:
             text = text.substr(1);
         }
         if (text.empty() || text[0] == '-' || !IsValidWord(text)) {
-            return false;
+            throw invalid_argument("неправильный текст запрса");
         }
+        return { text, is_minus, IsStopWord(text) };
 
-        result = QueryWord{ text, is_minus, IsStopWord(text) };
-        return true;
     }
 
     struct Query {
@@ -264,13 +255,10 @@ private:
         set<string> minus_words;
     };
 
-    [[nodiscard]] bool ParseQuery(const string& text, Query& result) const {
-        result = {};
+    Query ParseQuery(const string& text) const {
+        Query result = {};
         for (const string& word : SplitIntoWords(text)) {
-            QueryWord query_word;
-            if (!ParseQueryWord(word, query_word)) {
-                return false;
-            }
+            QueryWord query_word = ParseQueryWord(word);
             if (!query_word.is_stop) {
                 if (query_word.is_minus) {
                     result.minus_words.insert(query_word.data);
@@ -280,7 +268,7 @@ private:
                 }
             }
         }
-        return true;
+        return result;
     }
     double ComputeWordInverseDocumentFreq(const string& word) const {
         return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());
