@@ -1,4 +1,6 @@
+//Final project of 4-th split. Cherepukhin Evgeny
 #pragma once
+
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -28,7 +30,7 @@ IteratorRange<Iterator>::IteratorRange(Iterator begin, Iterator end)
     , size_(distance(first_, last_)) {}
 
 template <typename Iterator>
-Iterator IteratorRange<Iterator> ::begin() const {
+Iterator IteratorRange<Iterator>::begin() const {
     return first_;
 }
 
@@ -53,6 +55,7 @@ inline std::ostream& operator<<(std::ostream& out, const IteratorRange<Iterator>
 template <typename Iterator>
 class Paginator {
 public:
+
     Paginator(Iterator begin, Iterator end, size_t page_size);
 
     auto begin() const;
@@ -60,6 +63,7 @@ public:
     size_t size() const;
 
 private:
+
     std::vector<IteratorRange<Iterator>> pages_;
 };
 

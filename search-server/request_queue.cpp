@@ -1,19 +1,20 @@
+//Final project of 4-th split. Cherepukhin Evgeny
 #include "request_queue.h"
+
 using namespace std;
 
 RequestQueue::RequestQueue(const SearchServer& search_server)
     :search_server_(search_server) {}
 
 RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query, DocumentStatus status) {
-    const auto documents = search_server_.FindTopDocuments(raw_query, status);
-    AddRequest(documents.size());
-    return documents;
+    
+    return AddFindRequest(raw_query, [status](int document_id, DocumentStatus document_status, int rating) {
+        return document_status == status;
+        });
 }
 
-RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query) {
-    const auto documents = search_server_.FindTopDocuments(raw_query);
-    AddRequest(documents.size());
-    return documents;
+RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query) {    
+    return AddFindRequest(raw_query, DocumentStatus::ACTUAL);
 }
 
 int RequestQueue::GetNoResultRequests() const {

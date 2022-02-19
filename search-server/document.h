@@ -1,5 +1,8 @@
+//Final project of 4-th split. Cherepukhin Evgeny
 #pragma once
+
 #include <iostream>
+
 struct Document {
     Document() = default;
     Document(int id, double relevance, int rating);
@@ -7,7 +10,9 @@ struct Document {
     double relevance = 0.0;
     int rating = 0;
 };
+
 std::ostream& operator<<(std::ostream& out, const Document& document);
+
 enum class DocumentStatus {
     ACTUAL,
     IRRELEVANT,

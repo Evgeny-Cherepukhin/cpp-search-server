@@ -1,3 +1,4 @@
+//Final project of 4-th split. Cherepukhin Evgeny
 #include<algorithm>
 
 #include"string_processing.h"

@@ -1,3 +1,4 @@
+//Final project of 4-th split. Cherepukhin Evgeny
 #include <iostream>
 #include "read_input_functions.h"
 using namespace std;
