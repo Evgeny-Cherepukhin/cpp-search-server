@@ -1,4 +1,4 @@
-//Final project of 4-th split. Cherepukhin Evgeny
+//Final project of 5-th split. Cherepukhin Evgeny
 #pragma once
 
 #include <iostream>

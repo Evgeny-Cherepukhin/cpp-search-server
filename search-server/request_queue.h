@@ -1,4 +1,4 @@
-//Final project of 4-th split. Cherepukhin Evgeny
+//Final project of 5-th split. Cherepukhin Evgeny
 #pragma once
 
 #include <deque>
@@ -44,7 +44,7 @@ private:
 };
 
 template <typename DocumentPredicate>
-RequestQueue::FindResult RequestQueue:: AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate) {    
+RequestQueue::FindResult RequestQueue::AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate) {
     const auto documents = search_server_.FindTopDocuments(raw_query, document_predicate);
     AddRequest(documents.size());
     return documents;

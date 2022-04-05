@@ -1,4 +1,4 @@
-//Final project of 4-th split. Cherepukhin Evgeny
+//Final project of 5-th split. Cherepukhin Evgeny
 #include "request_queue.h"
 
 using namespace std;
@@ -7,13 +7,13 @@ RequestQueue::RequestQueue(const SearchServer& search_server)
     :search_server_(search_server) {}
 
 RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query, DocumentStatus status) {
-    
+
     return AddFindRequest(raw_query, [status](int document_id, DocumentStatus document_status, int rating) {
         return document_status == status;
         });
 }
 
-RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query) {    
+RequestQueue::FindResult RequestQueue::AddFindRequest(const string& raw_query) {
     return AddFindRequest(raw_query, DocumentStatus::ACTUAL);
 }
 

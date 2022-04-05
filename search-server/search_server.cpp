@@ -1,12 +1,13 @@
-//Final project of 4-th split. Cherepukhin Evgeny
+//Final project of 5-th split. Cherepukhin Evgeny
 #include "search_server.h"
+
 
 using namespace std;
 
-SearchServer:: SearchServer(const string& stop_words_text)
-    : SearchServer(SplitIntoWords(stop_words_text)){}
+SearchServer::SearchServer(const std::string& stop_words_text)
+    : SearchServer(SplitIntoWords(stop_words_text)) {}
 
-void SearchServer::AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& ratings) {
+void SearchServer::AddDocument(int document_id, const std::string& document, DocumentStatus status, const vector<int>& ratings) {
     if ((document_id < 0)) {
         throw invalid_argument("id не может быть отрицательным"s);
     }
@@ -15,29 +16,52 @@ void SearchServer::AddDocument(int document_id, const string& document, Document
         throw invalid_argument("попытка добавления документа с существующим  id");
 
     }
-    const auto words = SplitIntoWordsNoStop(document);
+    auto words = SplitIntoWordsNoStop(document);
 
     const double inv_word_count = 1.0 / words.size();
-    for (const string& word : words) {
+    map<std::string, double> word_to_freqs;
+    for (const std::string& word : words) {
         word_to_document_freqs_[word][document_id] += inv_word_count;
-    }
-    documents_.emplace(document_id, DocumentData{ ComputeAverageRating(ratings), status });
-    document_ids_.push_back(document_id);
+        word_to_freqs[word] += inv_word_count;
+    }    
+     
+    documents_.emplace(document_id,  DocumentData { ComputeAverageRating(ratings), status, words, word_to_freqs  });
+    document_ids_.insert(document_id);
 }
 
-int SearchServer:: GetDocumentCount() const {
+
+int SearchServer::GetDocumentCount() const {
     return documents_.size();
 }
 
-int SearchServer::GetDocumentId(int index) const {
-    return document_ids_.at(index);
+vector<string> SearchServer:: GetDocumentWords (int document_id) {
+    return documents_[document_id].document_words;
 }
+
+
+SearchServer::ConstIterator SearchServer::begin() const {
+    return document_ids_.cbegin();
+}
+
+SearchServer::ConstIterator SearchServer::end() const {
+    return document_ids_.cend();
+}
+
+const SearchServer::MapWordFreqs& SearchServer::GetWordFrequencies(int document_id) const {
+    static const MapWordFreqs EMPTY_MAP;
+    if (documents_.count(document_id) > 0) {
+        return documents_.at(document_id).word_to_freqs;
+    }
+    return EMPTY_MAP;
+}
+
+
 
 bool SearchServer::IsStopWord(const string& word) const {
     return stop_words_.count(word) > 0;
 }
 
-bool SearchServer::IsValidWord(const string& word) {    
+bool SearchServer::IsValidWord(const string& word) {
     return none_of(word.begin(), word.end(), [](char c) {
         return c >= '\0' && c < ' ';
         });
@@ -111,6 +135,7 @@ SearchServer::FindResult SearchServer::FindTopDocuments(const std::string& raw_q
 }
 
 SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string& raw_query, int document_id) const {
+    
     const auto query = ParseQuery(raw_query);
 
     std::vector<std::string> matched_words;
@@ -132,4 +157,17 @@ SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string&
         }
     }
     return { matched_words, documents_.at(document_id).status };
+}
+
+void SearchServer::RemoveDocument(int document_id) {
+    if (documents_.count(document_id) == 0) {
+        return;
+    }
+    std::for_each(documents_.at(document_id).word_to_freqs.begin(),
+        documents_.at(document_id).word_to_freqs.end(),
+        [this, document_id](const auto& word) {
+            word_to_document_freqs_[word.first].erase(document_id);
+        });
+    documents_.erase(document_id);
+    document_ids_.erase(document_id);
 }

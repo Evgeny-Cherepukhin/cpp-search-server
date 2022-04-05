@@ -1,4 +1,4 @@
-//Final project of 4-th split. Cherepukhin Evgeny
+//Final project of 5-th split. Cherepukhin Evgeny
 #pragma once
 
 #include <algorithm>
@@ -9,9 +9,11 @@
 #include <tuple>
 #include <vector>
 #include <numeric>
-
+#include <execution>
+#include <iterator>
 #include "document.h"
 #include "string_processing.h"
+#include "log_duration.h"
 
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
@@ -21,8 +23,9 @@ class SearchServer {
 public:
 
     using FindResult = std::vector<Document>;
-
     using MatchDocumentResult = std::tuple<std::vector<std::string>, DocumentStatus>;
+    using ConstIterator = std::set<int>::const_iterator;
+    using MapWordFreqs = std::map<std::string, double>;
 
     template <typename StringContainer>
     explicit SearchServer(const StringContainer& stop_words);
@@ -38,17 +41,32 @@ public:
 
     FindResult FindTopDocuments(const std::string& raw_query) const;
 
-    int GetDocumentCount() const;
+    int GetDocumentCount() const;  
 
-    int GetDocumentId(int index) const;
+    std::vector<std::string> GetDocumentWords(int document_id);
+
+    ConstIterator begin() const;
+
+    ConstIterator end() const;
+
+    const MapWordFreqs& GetWordFrequencies(int document_id) const;
+
+    void RemoveDocument(int document_id);
 
     MatchDocumentResult MatchDocument(const std::string& raw_query, int document_id) const;
+
+    
+  
+
+
 
 private:
 
     struct DocumentData {
         int rating;
         DocumentStatus status;
+        std::vector<std::string> document_words;
+        MapWordFreqs word_to_freqs;        
     };
 
 private:
@@ -71,7 +89,7 @@ private:
     const std::set<std::string> stop_words_;
     std::map<std::string, std::map<int, double>> word_to_document_freqs_;
     std::map<int, DocumentData> documents_;
-    std::vector<int> document_ids_;
+    std::set<int> document_ids_;
 
 private:
 
@@ -119,6 +137,7 @@ SearchServer::SearchServer(const StringContainer& stop_words)
 
 template <typename DocumentPredicate>
 SearchServer::FindResult SearchServer::FindTopDocuments(const std::string& raw_query, DocumentPredicate document_predicate) const {
+    
     const auto query = ParseQuery(raw_query);
 
     auto matched_documents = FindAllDocuments(query, document_predicate);
