@@ -54,19 +54,12 @@ public:
     void RemoveDocument(int document_id);
 
     MatchDocumentResult MatchDocument(const std::string& raw_query, int document_id) const;
-
-    
-  
-
-
-
+        
 private:
 
     struct DocumentData {
         int rating;
-        DocumentStatus status;
-        std::vector<std::string> document_words;
-        MapWordFreqs word_to_freqs;        
+        DocumentStatus status;                
     };
 
 private:
@@ -82,6 +75,7 @@ private:
     struct Query {
         std::set<std::string> plus_words;
         std::set<std::string> minus_words;
+
     };
 
 private:
@@ -89,7 +83,8 @@ private:
     const std::set<std::string> stop_words_;
     std::map<std::string, std::map<int, double>> word_to_document_freqs_;
     std::map<int, DocumentData> documents_;
-    std::set<int> document_ids_;
+    std::set<int> document_ids_;    
+    MapWordFreqs word_to_freqs;
 
 private:
 

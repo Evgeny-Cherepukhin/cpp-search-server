@@ -25,7 +25,7 @@ void SearchServer::AddDocument(int document_id, const std::string& document, Doc
         word_to_freqs[word] += inv_word_count;
     }    
      
-    documents_.emplace(document_id,  DocumentData { ComputeAverageRating(ratings), status, words, word_to_freqs  });
+    documents_.emplace(document_id,  DocumentData { ComputeAverageRating(ratings), status  });
     document_ids_.insert(document_id);
 }
 
@@ -33,11 +33,6 @@ void SearchServer::AddDocument(int document_id, const std::string& document, Doc
 int SearchServer::GetDocumentCount() const {
     return documents_.size();
 }
-
-vector<string> SearchServer:: GetDocumentWords (int document_id) {
-    return documents_[document_id].document_words;
-}
-
 
 SearchServer::ConstIterator SearchServer::begin() const {
     return document_ids_.cbegin();
@@ -47,15 +42,18 @@ SearchServer::ConstIterator SearchServer::end() const {
     return document_ids_.cend();
 }
 
+//Ќе могу пон€ть, что значит двойной поиск.
 const SearchServer::MapWordFreqs& SearchServer::GetWordFrequencies(int document_id) const {
-    static const MapWordFreqs EMPTY_MAP;
-    if (documents_.count(document_id) > 0) {
-        return documents_.at(document_id).word_to_freqs;
+    static MapWordFreqs EMPTY_MAP;    
+    if (document_ids_.count(document_id) > 0) {
+        for (const auto& [word, mapa] : word_to_document_freqs_) {
+            if (mapa.count(document_id)) {
+                EMPTY_MAP[word] = mapa.at(document_id);
+            }
+        }
     }
     return EMPTY_MAP;
 }
-
-
 
 bool SearchServer::IsStopWord(const string& word) const {
     return stop_words_.count(word) > 0;
@@ -163,11 +161,9 @@ void SearchServer::RemoveDocument(int document_id) {
     if (documents_.count(document_id) == 0) {
         return;
     }
-    std::for_each(documents_.at(document_id).word_to_freqs.begin(),
-        documents_.at(document_id).word_to_freqs.end(),
-        [this, document_id](const auto& word) {
-            word_to_document_freqs_[word.first].erase(document_id);
-        });
+    for (const auto& [word, freq] : GetWordFrequencies(document_id)) {
+        word_to_document_freqs_[word].erase(document_id);
+    }    
     documents_.erase(document_id);
     document_ids_.erase(document_id);
 }

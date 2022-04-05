@@ -3,14 +3,18 @@
 
 using namespace std;
 
+// Не смог разобраться как применить std::transform
 void RemoveDuplicates(SearchServer& search_server) {
     vector<int> del;
-    std::set<std::set<std::string>> uniq;
+    std::set<std::set<std::string>> unique;
     for (const int document_id : search_server) {
-        auto words = search_server.GetDocumentWords(document_id);
-         std::set<std::string> set(words.begin(), words.end());
-         if (!uniq.count(set)) {
-             uniq.insert(set);
+         auto words = search_server.GetWordFrequencies(document_id);
+         set<string> doc_words;
+         for (const auto& word : words) {
+             doc_words.insert(word.first);
+         }         
+         if (!unique.count(doc_words)) {
+             unique.insert(doc_words);
          }
          else {
              del.push_back(document_id);
