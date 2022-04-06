@@ -10,8 +10,6 @@
 #include"string_processing.h"
 #include"remove_duplicates.h"
 
-
-
 using namespace std;
 int main() {
     SearchServer search_server("and with"s);

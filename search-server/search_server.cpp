@@ -19,10 +19,9 @@ void SearchServer::AddDocument(int document_id, const std::string& document, Doc
     auto words = SplitIntoWordsNoStop(document);
 
     const double inv_word_count = 1.0 / words.size();
-    map<std::string, double> word_to_freqs;
     for (const std::string& word : words) {
         word_to_document_freqs_[word][document_id] += inv_word_count;
-        word_to_freqs[word] += inv_word_count;
+        word_to_freqs[document_id][word] += inv_word_count;
     }    
      
     documents_.emplace(document_id,  DocumentData { ComputeAverageRating(ratings), status  });
@@ -42,15 +41,10 @@ SearchServer::ConstIterator SearchServer::end() const {
     return document_ids_.cend();
 }
 
-//Ќе могу пон€ть, что значит двойной поиск.
 const SearchServer::MapWordFreqs& SearchServer::GetWordFrequencies(int document_id) const {
-    static MapWordFreqs EMPTY_MAP;    
+    static const MapWordFreqs EMPTY_MAP;    
     if (document_ids_.count(document_id) > 0) {
-        for (const auto& [word, mapa] : word_to_document_freqs_) {
-            if (mapa.count(document_id)) {
-                EMPTY_MAP[word] = mapa.at(document_id);
-            }
-        }
+        return word_to_freqs.at(document_id);
     }
     return EMPTY_MAP;
 }
@@ -166,4 +160,5 @@ void SearchServer::RemoveDocument(int document_id) {
     }    
     documents_.erase(document_id);
     document_ids_.erase(document_id);
+    word_to_freqs.erase(document_id);
 }
