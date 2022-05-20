@@ -1,4 +1,4 @@
-//Final project of 5-th split. Cherepukhin Evgeny
+//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
 #include "document.h"
 
 using namespace std;

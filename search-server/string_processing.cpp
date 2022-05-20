@@ -1,27 +1,25 @@
-//Final project of 5-th split. Cherepukhin Evgeny
+//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
 #include<algorithm>
 
 #include"string_processing.h"
 
 using namespace std;
 
-VectorString SplitIntoWords(const string& text) {
-    vector<string> words;
-    string word;
-    for (const char c : text) {
-        if (c == ' ') {
-            if (!word.empty()) {
-                words.push_back(word);
-                word.clear();
-            }
+VectorStringView SplitIntoWords(string_view text) {
+    VectorStringView words;
+
+/* Разбиваем текст на слова, для чего находим "пробел" и добавляем в вектор
+ * слово от 0 символа до пробела.*/
+    while (true) {
+        const auto space = text.find(' ');
+        words.push_back(text.substr(0, space));
+        if (space == text.npos) {
+            break;
         }
         else {
-            word += c;
+/* Перемещаем итератор на следующий за пробелом символ.*/
+            text.remove_prefix(space + 1);
         }
     }
-    if (!word.empty()) {
-        words.push_back(word);
-    }
-
     return words;
 }

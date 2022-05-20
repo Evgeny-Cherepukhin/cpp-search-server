@@ -1,4 +1,4 @@
-//Final project of 5-th split. Cherepukhin Evgeny
+//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
 #pragma once
 
 #include <deque>
@@ -16,11 +16,11 @@ public:
     using FindResult = std::vector<Document>;
 
     template <typename DocumentPredicate>
-    FindResult AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate);
+    FindResult AddFindRequest(const std::string_view raw_query, DocumentPredicate document_predicate);
 
-    FindResult AddFindRequest(const std::string& raw_query, DocumentStatus status);
+    FindResult AddFindRequest(const std::string_view raw_query, DocumentStatus status);
 
-    FindResult AddFindRequest(const std::string& raw_query);
+    FindResult AddFindRequest(const std::string_view raw_query);
 
     int GetNoResultRequests() const;
 
@@ -44,7 +44,7 @@ private:
 };
 
 template <typename DocumentPredicate>
-RequestQueue::FindResult RequestQueue::AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate) {
+RequestQueue::FindResult RequestQueue::AddFindRequest(const std::string_view raw_query, DocumentPredicate document_predicate) {
     const auto documents = search_server_.FindTopDocuments(raw_query, document_predicate);
     AddRequest(documents.size());
     return documents;
