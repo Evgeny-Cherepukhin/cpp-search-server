@@ -1,4 +1,4 @@
-//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
+//Р§РµСЂРµРїСѓС…РёРЅ Р•РІРіРµРЅРёР№ РЎРµСЂРіРµРµРІРёС‡. РС‚РѕРіРѕРІС‹Р№ РїСЂРѕРµРєС‚ 8 СЃРїСЂРёРЅС‚.
 #pragma once
 #include <algorithm>
 #include <cstdlib>
@@ -14,7 +14,7 @@
 
 using namespace std::string_literals;
 
-//Создадим структуру Mutex_Map, в которой будем хранить словарь и mutex.
+//РЎРѕР·РґР°РґРёРј СЃС‚СЂСѓРєС‚СѓСЂСѓ Mutex_Map, РІ РєРѕС‚РѕСЂРѕР№ Р±СѓРґРµРј С…СЂР°РЅРёС‚СЊ СЃР»РѕРІР°СЂСЊ Рё mutex.
 template <typename Key, typename Value>
 struct Mutex_Map {
     std::map<Key, Value> data;
@@ -24,18 +24,18 @@ struct Mutex_Map {
 template <typename Key, typename Value>
 class ConcurrentMap {
 public:
-//static_assert не даёт программе скомпилироваться при попытке использовать в качестве ключа
-//что-либо, кроме целых чисел
+//static_assert РЅРµ РґР°С‘С‚ РїСЂРѕРіСЂР°РјРјРµ СЃРєРѕРјРїРёР»РёСЂРѕРІР°С‚СЊСЃСЏ РїСЂРё РїРѕРїС‹С‚РєРµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІ РєР°С‡РµСЃС‚РІРµ РєР»СЋС‡Р°
+//С‡С‚Рѕ-Р»РёР±Рѕ, РєСЂРѕРјРµ С†РµР»С‹С… С‡РёСЃРµР»
     static_assert(std::is_integral_v<Key>, "ConcurrentMap supports only integer keys");
 
-//В структуру Access дополнительно добавим поле lock_guard, для блокировки mutex. 
-//Структура предоставляет ссылку на значение словаря и обеспечивает синхронизацию
-//доступа к нему.
+//Р’ СЃС‚СЂСѓРєС‚СѓСЂСѓ Access РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РґРѕР±Р°РІРёРј РїРѕР»Рµ lock_guard, РґР»СЏ Р±Р»РѕРєРёСЂРѕРІРєРё mutex. 
+//РЎС‚СЂСѓРєС‚СѓСЂР° РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ СЃСЃС‹Р»РєСѓ РЅР° Р·РЅР°С‡РµРЅРёРµ СЃР»РѕРІР°СЂСЏ Рё РѕР±РµСЃРїРµС‡РёРІР°РµС‚ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
+//РґРѕСЃС‚СѓРїР° Рє РЅРµРјСѓ.
     struct Access {
         std::lock_guard<std::mutex> value_guard;
         Value& ref_to_value;
     };
-    //Объявляем конструктор, оператор [], методы Erase и BuildOrdinaryMap
+    //РћР±СЉСЏРІР»СЏРµРј РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РѕРїРµСЂР°С‚РѕСЂ [], РјРµС‚РѕРґС‹ Erase Рё BuildOrdinaryMap
     explicit ConcurrentMap(size_t bucket_count = 1);
 
     Access operator[](const Key& key);
@@ -45,24 +45,24 @@ public:
     std::map<Key, Value> BuildOrdinaryMap();
 
 private:
-//В приватной части разместим вектор структуры Mutex_Map
+//Р’ РїСЂРёРІР°С‚РЅРѕР№ С‡Р°СЃС‚Рё СЂР°Р·РјРµСЃС‚РёРј РІРµРєС‚РѕСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ Mutex_Map
     std::vector<Mutex_Map<Key, Value>> mutex_maps_;
 };
 
-//Конструктор класса принимает количество подсловарей, на которое нужно разбить 
-//всё пространство ключей.
+//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєР»Р°СЃСЃР° РїСЂРёРЅРёРјР°РµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґСЃР»РѕРІР°СЂРµР№, РЅР° РєРѕС‚РѕСЂРѕРµ РЅСѓР¶РЅРѕ СЂР°Р·Р±РёС‚СЊ 
+//РІСЃС‘ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РєР»СЋС‡РµР№.
 template <typename Key, typename Value>
 ConcurrentMap<Key, Value>:: ConcurrentMap(size_t bucket_count)
         : mutex_maps_(bucket_count) {}
 
-//operator[] возвращает объект класса Access, содержащий ссылку на соответствующее значение
+//operator[] РІРѕР·РІСЂР°С‰Р°РµС‚ РѕР±СЉРµРєС‚ РєР»Р°СЃСЃР° Access, СЃРѕРґРµСЂР¶Р°С‰РёР№ СЃСЃС‹Р»РєСѓ РЅР° СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРµ Р·РЅР°С‡РµРЅРёРµ
 template <typename Key, typename Value>
 typename ConcurrentMap<Key, Value>::Access ConcurrentMap<Key, Value>::operator[](const Key& key) {
         uint64_t tmp_key = static_cast<uint64_t>(key) % mutex_maps_.size();
         return { std::lock_guard(mutex_maps_[tmp_key].mutex_data), mutex_maps_[tmp_key].data[key] };
 }
 
-//Метод Erase удаляет элемент из словаря по ключу.
+//РњРµС‚РѕРґ Erase СѓРґР°Р»СЏРµС‚ СЌР»РµРјРµРЅС‚ РёР· СЃР»РѕРІР°СЂСЏ РїРѕ РєР»СЋС‡Сѓ.
 template <typename Key, typename Value>
 auto ConcurrentMap<Key, Value>::Erase(const Key& key) {
     uint64_t tmp_key = static_cast<uint64_t>(key) % mutex_maps_.size();
@@ -70,8 +70,8 @@ auto ConcurrentMap<Key, Value>::Erase(const Key& key) {
     return mutex_maps_[tmp_key].data.erase(key);
 }
 
-//Метод BuildOrdinaryMap() сливает вместе части словаря и возвращает весь словарь целиком.
-//Потокобезопасен, т.е. работает корректно, когда другие потоки выполняют операции с ConcurrentMap.
+//РњРµС‚РѕРґ BuildOrdinaryMap() СЃР»РёРІР°РµС‚ РІРјРµСЃС‚Рµ С‡Р°СЃС‚Рё СЃР»РѕРІР°СЂСЏ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІРµСЃСЊ СЃР»РѕРІР°СЂСЊ С†РµР»РёРєРѕРј.
+//РџРѕС‚РѕРєРѕР±РµР·РѕРїР°СЃРµРЅ, С‚.Рµ. СЂР°Р±РѕС‚Р°РµС‚ РєРѕСЂСЂРµРєС‚РЅРѕ, РєРѕРіРґР° РґСЂСѓРіРёРµ РїРѕС‚РѕРєРё РІС‹РїРѕР»РЅСЏСЋС‚ РѕРїРµСЂР°С†РёРё СЃ ConcurrentMap.
 template <typename Key, typename Value>
 std::map<Key, Value> ConcurrentMap<Key, Value>:: BuildOrdinaryMap() {
     std::map<Key, Value> main_map;

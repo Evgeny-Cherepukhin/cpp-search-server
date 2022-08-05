@@ -1,4 +1,4 @@
-//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
+//Р§РµСЂРµРїСѓС…РёРЅ Р•РІРіРµРЅРёР№ РЎРµСЂРіРµРµРІРёС‡. РС‚РѕРіРѕРІС‹Р№ РїСЂРѕРµРєС‚ 8 СЃРїСЂРёРЅС‚.
 #pragma once
 
 #include <iostream>
@@ -11,7 +11,7 @@ using VectorStringView = std::vector<std::string_view>;
 
 using SetString = std::set<std::string, std::less<>>;
 
-//Создаёт словарь из не пустых строк
+//РЎРѕР·РґР°С‘С‚ СЃР»РѕРІР°СЂСЊ РёР· РЅРµ РїСѓСЃС‚С‹С… СЃС‚СЂРѕРє
 template <typename StringContainer>
 inline SetString MakeUniqueNonEmptyStrings(const StringContainer& strings) {
     SetString non_empty_strings;
@@ -22,5 +22,5 @@ inline SetString MakeUniqueNonEmptyStrings(const StringContainer& strings) {
     }
     return non_empty_strings;
 }
-//Разбивает строку на вектор слов
+//Р Р°Р·Р±РёРІР°РµС‚ СЃС‚СЂРѕРєСѓ РЅР° РІРµРєС‚РѕСЂ СЃР»РѕРІ
 VectorStringView SplitIntoWords(std::string_view text);

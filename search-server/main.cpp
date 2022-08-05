@@ -1,4 +1,4 @@
-//Черепухин Евгений Сергеевич. Итоговый проект 8 спринт.
+//Р§РµСЂРµРїСѓС…РёРЅ Р•РІРіРµРЅРёР№ РЎРµСЂРіРµРµРІРёС‡. РС‚РѕРіРѕРІС‹Р№ РїСЂРѕРµРєС‚ 8 СЃРїСЂРёРЅС‚.
 #include "process_queries.h"
 #include "search_server.h"
 
@@ -33,19 +33,19 @@ int main() {
 
 
     cout << "ACTUAL by default:"s << endl;
-    // последовательная версия
+    // РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ
     for (const Document& document : search_server.FindTopDocuments("curly nasty cat"s)) {
         PrintDocument(document);
     }
     cout << "BANNED:"s << endl;
-    // последовательная версия
+    // РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ
     for (const Document& document : search_server.FindTopDocuments(execution::seq, "curly nasty cat"s, DocumentStatus::BANNED)) {
         PrintDocument(document);
     }
 
     cout << "Even ids:"s << endl;
-    // параллельная версия
-    for (const Document& document : search_server.FindTopDocuments(execution::par, "curly nasty cat"s/*, [](int document_id, DocumentStatus status, int rating) { return document_id % 2 == 0; }*/)) {
+    // РїР°СЂР°Р»Р»РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ
+    for (const Document& document : search_server.FindTopDocuments(execution::par, "curly nasty cat"s, [](int document_id, DocumentStatus status, int rating) { return document_id % 2 == 0; })) {
         PrintDocument(document);
     }
 

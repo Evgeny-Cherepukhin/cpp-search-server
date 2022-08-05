@@ -1,24 +1,24 @@
-//Черепухин Евгений Сергеевич. Итоговый проект 8 сплит.
+//Р§РµСЂРµРїСѓС…РёРЅ Р•РІРіРµРЅРёР№ РЎРµСЂРіРµРµРІРёС‡. РС‚РѕРіРѕРІС‹Р№ РїСЂРѕРµРєС‚ 8 СЃРїР»РёС‚.
 #include "process_queries.h"
 
-//Реализация функции ProcessQueries.
+//Р РµР°Р»РёР·Р°С†РёСЏ С„СѓРЅРєС†РёРё ProcessQueries.
 std::vector<std::vector<Document>> ProcessQueries(
     const SearchServer& search_server,
     const std::vector<std::string>& queries) {
-    //Создаём вектор result размером queries.size().
+    //РЎРѕР·РґР°С‘Рј РІРµРєС‚РѕСЂ result СЂР°Р·РјРµСЂРѕРј queries.size().
     std::vector<std::vector<Document>> result(queries.size());
-    //Применяем transform, который записывает в result результат
-    //вызова FindTopDocuments для запроса querie
+    //РџСЂРёРјРµРЅСЏРµРј transform, РєРѕС‚РѕСЂС‹Р№ Р·Р°РїРёСЃС‹РІР°РµС‚ РІ result СЂРµР·СѓР»СЊС‚Р°С‚
+    //РІС‹Р·РѕРІР° FindTopDocuments РґР»СЏ Р·Р°РїСЂРѕСЃР° querie
     std::transform(std::execution::par,
         queries.begin(), queries.end(),
         result.begin(),
         [&search_server](const std::string& querie) { return search_server.FindTopDocuments(querie); }
     );
-    //Возвращаем результат работы функции
+    //Р’РѕР·РІСЂР°С‰Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚ СЂР°Р±РѕС‚С‹ С„СѓРЅРєС†РёРё
     return result;
 }
 
-//Реализация функции ProcessQueriesJoined.
+//Р РµР°Р»РёР·Р°С†РёСЏ С„СѓРЅРєС†РёРё ProcessQueriesJoined.
 std::list<Document> ProcessQueriesJoined(
     const SearchServer& search_server,
     const std::vector<std::string>& queries) {
